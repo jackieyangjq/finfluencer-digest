@@ -20,7 +20,12 @@ def http_get(url: str) -> bytes:
 
 
 def videos_from_rss(channel_id: str) -> list[dict]:
-    root = ET.fromstring(http_get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"))
+    return parse_feed(http_get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"))
+
+
+def parse_feed(xml: bytes) -> list[dict]:
+    """解析频道 RSS 订阅源（Atom 格式）里的视频。演示模式直接拿包内的 RSS 文件调用它。"""
+    root = ET.fromstring(xml)
     videos = []
     for e in root.findall("a:entry", ATOM_NS):
         link = e.find("a:link", ATOM_NS).get("href", "")

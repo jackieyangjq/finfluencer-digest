@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("pandas")  # 持仓部分的附加依赖；没装时跳过，不影响其他测试
+
 from finfluencer_digest.portfolio.section import cited_only
 
 NEWS = [{"source": "Reuters"}, {"source": "长桥资讯"}]

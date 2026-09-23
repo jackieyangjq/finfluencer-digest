@@ -27,9 +27,15 @@ def _fetch_json(url: str) -> dict:
         return json.loads(r.read())
 
 
-def recent_posts(handle: str, since: dt.datetime, seen: dict, *, fetch=_fetch_json) -> list[dict]:
-    """返回 since 之后、没处理过的原创帖子（跳过转发），按时间倒序。"""
-    data = fetch(FX_URL.format(handle=handle))
+def fetch_statuses(handle: str) -> dict:
+    """从 FxTwitter 接口取账号最近的帖子，返回接口的原始 JSON。"""
+    return _fetch_json(FX_URL.format(handle=handle))
+
+
+def recent_posts(handle: str, since: dt.datetime, seen: dict, *, fetch=fetch_statuses) -> list[dict]:
+    """返回 since 之后、没处理过的原创帖子（跳过转发），按时间倒序。
+    fetch(handle) 返回接口的原始 JSON；演示模式换成读包内的文件。"""
+    data = fetch(handle)
     posts = []
     for t in data.get("results") or []:
         created = dt.datetime.fromtimestamp(t["created_timestamp"], dt.UTC)

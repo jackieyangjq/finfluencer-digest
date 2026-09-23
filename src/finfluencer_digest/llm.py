@@ -1,14 +1,19 @@
 """调用 Gemini：按顺序尝试备选模型，繁忙时等待重试，并记下每个模型的用量。
 所有对 Gemini 的请求都经过 Gemini._call(model, **kwargs)，测试可以替换它。
+RecordedGemini 是演示模式用的替身：不联网，按调用标签回放录好的回复。
 """
 from __future__ import annotations
 
 import functools
+import json
 import logging
 import time
 from collections import defaultdict
+from types import SimpleNamespace
 
 from google import genai
+
+from .summarize import VideoSummary
 
 logging.getLogger("google_genai.models").setLevel(logging.ERROR)  # 屏蔽与本程序无关的库提示
 
@@ -72,3 +77,25 @@ class Gemini:
         parts = [f"{m} 调用 {n} 次（输入约 {i / 1e4:.1f} 万、输出约 {o / 1e4:.1f} 万 tokens）"
                  for m, (n, i, o) in self.usage.items()]
         return "今日 Gemini 用量：" + "；".join(parts) if parts else ""
+
+
+class RecordedGemini(Gemini):
+    """演示模式用：不建客户端、不联网，按 label 回放 responses 里录好的回复。
+    回复是 dict 的按 VideoSummary 解析成 parsed，是字符串的作为 text；没录的 label 直接抛 KeyError。
+    每次调用按固定的 tokens=(输入, 输出) 记用量，用量行照常出现。"""
+
+    def __init__(self, responses: dict, *, tokens: tuple[int, int] = (1000, 200)):
+        self._responses = responses
+        self._tokens = tokens
+        self.usage = defaultdict(lambda: [0, 0, 0])
+
+    def generate(self, models: list[str], *, label: str = "", **kwargs):
+        value = self._responses[label]
+        is_json = isinstance(value, dict)
+        resp = SimpleNamespace(
+            parsed=VideoSummary.model_validate(value) if is_json else None,
+            text=json.dumps(value, ensure_ascii=False) if is_json else value,
+            usage_metadata=SimpleNamespace(prompt_token_count=self._tokens[0],
+                                           candidates_token_count=self._tokens[1], thoughts_token_count=0),
+        )
+        return resp, models[0]

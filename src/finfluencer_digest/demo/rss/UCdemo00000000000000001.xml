@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 演示用的虚构频道，结构和 YouTube 频道的 RSS 订阅源一样 -->
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCdemo00000000000000001"/>
+ <id>yt:channel:demo00000000000000001</id>
+ <yt:channelId>demo00000000000000001</yt:channelId>
+ <title>示例博主·甲</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCdemo00000000000000001"/>
+ <author>
+  <name>示例博主·甲</name>
+  <uri>https://www.youtube.com/channel/UCdemo00000000000000001</uri>
+ </author>
+ <published>2026-01-01T00:00:00+00:00</published>
+ <entry>
+  <id>yt:video:demoShtA001</id>
+  <yt:videoId>demoShtA001</yt:videoId>
+  <yt:channelId>UCdemo00000000000000001</yt:channelId>
+  <title>一分钟看懂英伟达财报 #Shorts</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/demoShtA001"/>
+  <author>
+   <name>示例博主·甲</name>
+   <uri>https://www.youtube.com/channel/UCdemo00000000000000001</uri>
+  </author>
+  <published>2026-09-23T07:30:00+00:00</published>
+  <updated>2026-09-23T07:30:00+00:00</updated>
+  <media:group>
+   <media:title>一分钟看懂英伟达财报 #Shorts</media:title>
+   <media:content url="https://www.youtube.com/v/demoShtA001?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/demoShtA001/hqdefault.jpg" width="480" height="360"/>
+   <media:description>演示用的虚构短视频，没有对应的真实内容。</media:description>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:demoVidA001</id>
+  <yt:videoId>demoVidA001</yt:videoId>
+  <yt:channelId>UCdemo00000000000000001</yt:channelId>
+  <title>英伟达财报前瞻：数据中心需求还能涨多久</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=demoVidA001"/>
+  <author>
+   <name>示例博主·甲</name>
+   <uri>https://www.youtube.com/channel/UCdemo00000000000000001</uri>
+  </author>
+  <published>2026-09-23T06:00:00+00:00</published>
+  <updated>2026-09-23T06:00:00+00:00</updated>
+  <media:group>
+   <media:title>英伟达财报前瞻：数据中心需求还能涨多久</media:title>
+   <media:content url="https://www.youtube.com/v/demoVidA001?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/demoVidA001/hqdefault.jpg" width="480" height="360"/>
+   <media:description>演示用的虚构视频，没有对应的真实内容。</media:description>
+  </media:group>
+ </entry>
+</feed>

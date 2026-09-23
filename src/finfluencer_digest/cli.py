@@ -8,6 +8,9 @@
   finfluencer-digest --find-channel @某博主   查某个 YouTube 博主的频道 ID，方便加进 config.yaml
   finfluencer-digest gate                    定时任务用：打印 run=true 或 run=false，判断现在该不该运行
 以上都可以加 --config PATH（默认 ./config.yaml）；state/、data/、digests/ 和持仓文件都在配置文件所在的目录。
+
+  finfluencer-digest --demo [--out DIR]      演示：用包内虚构的频道、帖子和录好的模型回复跑完整流程，
+                                             不需要配置文件、密钥和网络；日报写到 DIR（默认 ./demo-output/）并打印
 """
 from __future__ import annotations
 
@@ -16,10 +19,12 @@ import datetime as dt
 import os
 import sys
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import x_posts
+from . import demo, x_posts
 from .aggregate import call_rows
 from .check import check
 from .config import LOCAL_TZ, load_config, load_env
@@ -29,7 +34,7 @@ from .mailer import send_email
 from .render import build_digest
 from .state import Paths, load_seen, save_calls, save_seen
 from .summarize import summarize_video, summarize_x, synthesize, x_channel_name
-from .youtube import find_channel_id, find_new_videos
+from .youtube import find_channel_id, find_new_videos, videos_from_rss
 
 SUBCOMMANDS = ("run", "gate")
 CONFIG_HELP = "配置文件（默认 ./config.yaml）；state/、data/、digests/ 都放在它所在的目录"
@@ -53,6 +58,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--per-channel", type=int, help="临时改：每位博主最多处理几个视频")
     p.add_argument("--max-minutes", type=int, help="临时改：每个视频最多看几分钟")
     p.add_argument("--portfolio-only", action="store_true", help="只生成“我的持仓”部分并打印（测试用，不发邮件）")
+    p.add_argument("--demo", action="store_true",
+                   help="演示：用包内虚构的频道和录好的模型回复跑完整流程，不需要配置文件、密钥和网络，不发邮件、不写记录")
+    p.add_argument("--out", type=Path, default=Path("demo-output"), metavar="DIR",
+                   help="演示模式的日报写到哪个目录（默认 ./demo-output/）")
 
     g = sub.add_parser("gate", help="定时任务用：判断现在该不该运行",
                        description="打印 run=true 或 run=false，不运行时第二行是原因。"
@@ -86,7 +95,41 @@ def _portfolio_section(cfg: dict, llm: Gemini, today_rows: list[dict], paths: Pa
     return build_section(cfg, llm.ask, today_rows, holdings_root=paths.holdings_root)
 
 
+@dataclass
+class Runtime:
+    """主流程用到的外部环境：正式运行在 run_command 里组装，演示模式由 demo_runtime 组装。
+    两者共用同一个主流程 run_digest。"""
+
+    cfg: dict
+    llm: Gemini
+    now: dt.datetime  # 带时区的当前时间；时间窗口、处理日期和日报日期（英国时间）都由它算
+    digest_dir: Path  # 日报写到这里
+    seen: dict = field(default_factory=dict)  # 处理过的视频和帖子
+    fetch_rss: Callable[[str], list[dict]] = videos_from_rss  # 频道 ID → 视频列表
+    fetch_x: Callable[[str], dict] = x_posts.fetch_statuses  # X 账号 → 帖子接口的原始回复
+    yt_key: str | None = None  # RSS 失效时改用 YouTube 官方接口的密钥
+    watch: frozenset[str] = frozenset()  # 你关注的股票
+    paths: Paths | None = None  # 持仓文件和 state/、data/ 的位置；演示模式没有
+    demo: bool = False  # 演示模式：不发邮件、不写记录，把日报打印出来
+
+
+def apply_overrides(cfg: dict, args: argparse.Namespace) -> None:
+    """命令行的临时改动（--lookback-hours、--per-channel、--max-minutes）和 --channel 筛选，直接改 cfg。"""
+    for key, value in (("lookback_hours", args.lookback_hours), ("max_videos_per_channel", args.per_channel),
+                       ("max_minutes", args.max_minutes)):
+        if value:
+            cfg[key] = value
+    if args.channel:
+        key = args.channel.lower()
+        cfg["channels"] = [ch for ch in cfg["channels"] if key in ch["name"].lower()]
+        cfg["x_accounts"] = [a for a in cfg.get("x_accounts") or []
+                             if key in a["name"].lower() or key in a["handle"].lower()]
+
+
 def run_command(args: argparse.Namespace) -> int:
+    if args.demo:
+        print("演示模式：频道、帖子和模型回复都是包内录好的虚构内容，不联网、不需要密钥。")
+        return run_digest(demo_runtime(args), args)
     paths = Paths.from_config(args.config)
     load_env(paths.root)
     cfg = load_config(args.config)
@@ -100,15 +143,7 @@ def run_command(args: argparse.Namespace) -> int:
                    password=os.getenv("GMAIL_APP_PASSWORD"), email_to=os.getenv("EMAIL_TO"))
         return 0 if ok else 1
 
-    for key, value in (("lookback_hours", args.lookback_hours), ("max_videos_per_channel", args.per_channel),
-                       ("max_minutes", args.max_minutes)):
-        if value:
-            cfg[key] = value
-    if args.channel:
-        key = args.channel.lower()
-        cfg["channels"] = [ch for ch in cfg["channels"] if key in ch["name"].lower()]
-        cfg["x_accounts"] = [a for a in cfg.get("x_accounts") or []
-                             if key in a["name"].lower() or key in a["handle"].lower()]
+    apply_overrides(cfg, args)
     llm = Gemini(os.environ["GEMINI_API_KEY"])
 
     if args.portfolio_only:
@@ -116,19 +151,35 @@ def run_command(args: argparse.Namespace) -> int:
         print("\n" + llm.usage_text())
         return 0
 
-    seen = load_seen(paths)
-    now = dt.datetime.now(dt.UTC)
-    videos, failures = find_new_videos(cfg, seen, now=now, yt_key=os.getenv("YOUTUBE_API_KEY"))
+    watch = frozenset(x.strip().upper() for x in os.getenv("WATCHLIST", "").split(",") if x.strip())
+    rt = Runtime(cfg=cfg, llm=llm, now=dt.datetime.now(dt.UTC), digest_dir=paths.digest_dir, seen=load_seen(paths),
+                 yt_key=os.getenv("YOUTUBE_API_KEY"), watch=watch, paths=paths)
+    return run_digest(rt, args)
+
+
+def demo_runtime(args: argparse.Namespace) -> Runtime:
+    """演示模式：包内的虚构素材和固定的当前时间。不读环境变量和 .env，不读写 state/、data/，只写 --out。"""
+    d = demo.load_demo()
+    apply_overrides(d.cfg, args)
+    return Runtime(cfg=d.cfg, llm=d.llm, now=d.now, digest_dir=args.out, fetch_rss=d.fetch_rss, fetch_x=d.fetch_x,
+                   demo=True)
+
+
+def run_digest(rt: Runtime, args: argparse.Namespace) -> int:
+    """主流程（正式运行和演示模式共用）：找新视频和帖子 → Gemini 整理 → 汇总 → 写日报 → 发邮件并记录已处理。"""
+    cfg, llm, seen = rt.cfg, rt.llm, rt.seen
+    now_london = rt.now.astimezone(LOCAL_TZ)
+    videos, failures = find_new_videos(cfg, seen, now=rt.now, fetch_rss=rt.fetch_rss, yt_key=rt.yt_key)
     if args.limit:
         videos = videos[: args.limit]
     print(f"找到 {len(videos)} 个新视频")
     for v in videos:
         print(f"  - [{v['channel']}] {v['title']}")
-    since = now - dt.timedelta(hours=cfg["lookback_hours"])
+    since = rt.now - dt.timedelta(hours=cfg["lookback_hours"])
     x_batches = []
     for acc in cfg.get("x_accounts") or []:
         try:
-            posts = x_posts.recent_posts(acc["handle"], since, seen)
+            posts = x_posts.recent_posts(acc["handle"], since, seen, fetch=rt.fetch_x)
         except Exception as e:
             failures.append(f"X 账号 @{acc['handle']} 读取失败（免费接口可能已失效）：{short_error(e)}")
             continue
@@ -138,7 +189,7 @@ def run_command(args: argparse.Namespace) -> int:
     if args.list:
         return 0
 
-    today = dt.date.today().isoformat()
+    today = now_london.date().isoformat()
     results, skipped = [], []
 
     def work(v):
@@ -181,20 +232,20 @@ def run_command(args: argparse.Namespace) -> int:
     portfolio_md, held = "", set()
     if cfg.get("portfolio", {}).get("enabled"):
         print("生成持仓部分…", flush=True)
-        portfolio_md, held = _portfolio_section(cfg, llm, rows, paths)
-    watch = {x.strip().upper() for x in os.getenv("WATCHLIST", "").split(",") if x.strip()}
-    now_london = dt.datetime.now(LOCAL_TZ)
-    md = build_digest(now_london.strftime("%Y-%m-%d"), results, synth, failures, skipped, watch, llm.usage_text(),
+        portfolio_md, held = _portfolio_section(cfg, llm, rows, rt.paths)
+    md = build_digest(now_london.strftime("%Y-%m-%d"), results, synth, failures, skipped, rt.watch, llm.usage_text(),
                       portfolio_md, frozenset(held))
 
-    paths.digest_dir.mkdir(exist_ok=True)
-    path = paths.digest_dir / f"{now_london:%Y-%m-%d}.md"
+    rt.digest_dir.mkdir(parents=True, exist_ok=True)
+    path = rt.digest_dir / f"{now_london:%Y-%m-%d}.md"
     if path.exists():
-        path = paths.digest_dir / f"{now_london:%Y-%m-%d-%H%M}.md"
+        path = rt.digest_dir / f"{now_london:%Y-%m-%d-%H%M}.md"
     path.write_text(md, encoding="utf-8")
-    print(f"日报已保存：{path.relative_to(paths.root)}")
+    print(f"日报已保存：{path if rt.demo else path.relative_to(rt.paths.root)}")
 
-    if args.dry_run:
+    if rt.demo:
+        print(f"演示模式：没有发邮件，也没有记录已处理的视频。日报全文：\n\n{md}")
+    elif args.dry_run:
         print("试运行：没有发邮件，也没有记录已处理的视频")
     elif videos or failures or cfg.get("send_when_empty", True):
         sender = os.environ["GMAIL_ADDRESS"]
@@ -202,8 +253,8 @@ def run_command(args: argparse.Namespace) -> int:
         subject = f"{'投资日报' if portfolio_md else '财经博主日报'} {now_london:%m-%d}｜{len(results)} 条博主更新"
         send_email(subject, md, sender=sender, password=os.environ["GMAIL_APP_PASSWORD"], to=to)
         print("✓ 邮件已发送")
-        save_seen(paths, seen, dt.date.today())
-        save_calls(paths, rows)
+        save_seen(rt.paths, seen, now_london.date())
+        save_calls(rt.paths, rows)
     # 有视频却一个都没处理成功时返回失败，GitHub 会发邮件提醒
     return 1 if videos and not results and not skipped else 0
 

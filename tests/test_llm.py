@@ -1,6 +1,6 @@
 import pytest
 
-from finfluencer_digest.llm import Gemini
+from finfluencer_digest.llm import Gemini, RecordedGemini
 
 
 class Err(Exception):
@@ -57,3 +57,16 @@ def test_ask_records_usage_and_text():
     llm.ask(["m1"], contents="y")
     assert llm.usage["m1"] == [2, 200, 50]
     assert llm.usage_text() == "今日 Gemini 用量：m1 调用 2 次（输入约 0.0 万、输出约 0.0 万 tokens）"
+
+
+def test_recorded_gemini_replays_by_label():
+    summary = {"is_market_related": True, "one_line": "一句话", "main_points": [], "stocks": [], "key_facts": [],
+               "risks": []}
+    llm = RecordedGemini({"video:v1": summary, "synth": "汇总文字"})
+    resp, model = llm.generate(["m1", "m2"], label="video:v1", contents="x")
+    assert model == "m1" and resp.parsed.one_line == "一句话"
+    llm.add_usage(model, resp.usage_metadata)
+    assert llm.ask(["p"], label="synth").text == "汇总文字" and llm.ask(["p"], label="synth").parsed is None
+    assert llm.usage == {"m1": [1, 1000, 200], "p": [2, 2000, 400]}
+    with pytest.raises(KeyError):
+        llm.generate(["m1"], label="video:没录过")

@@ -1,0 +1,22 @@
+# 演示模式的配置：频道、X 账号都是虚构的，模型名也是假的（回复是 responses.json 里录好的）。
+channels:
+  - name: 示例博主·甲
+    id: UCdemo00000000000000001
+  - name: 示例博主·乙
+    id: UCdemo00000000000000002
+  - name: 示例博主·丙
+    id: UCdemo00000000000000003
+x_accounts:
+  - name: 示例交易员
+    handle: sample_trader
+    note: 演示账号
+lookback_hours: 36
+max_videos_per_channel: 3
+skip_shorts: true
+max_workers: 1
+video_models: [demo-flash]
+synth_models: [demo-pro]
+video_fps: 0.2
+max_minutes: 50
+portfolio:
+  enabled: false
