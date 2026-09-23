@@ -158,11 +158,11 @@ def run_command(args: argparse.Namespace) -> int:
 
 
 def demo_runtime(args: argparse.Namespace) -> Runtime:
-    """演示模式：包内的虚构素材和固定的当前时间。不读环境变量和 .env，不读写 state/、data/，只写 --out。"""
+    """演示模式：包内的虚构素材、固定的当前时间和关注列表。不读环境变量和 .env，不读写 state/、data/，只写 --out。"""
     d = demo.load_demo()
     apply_overrides(d.cfg, args)
     return Runtime(cfg=d.cfg, llm=d.llm, now=d.now, digest_dir=args.out, fetch_rss=d.fetch_rss, fetch_x=d.fetch_x,
-                   demo=True)
+                   watch=d.watch, demo=True)
 
 
 def run_digest(rt: Runtime, args: argparse.Namespace) -> int:

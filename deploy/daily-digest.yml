@@ -1,0 +1,81 @@
+# Daily digest for a private "config repository" (see deploy/README.md).
+# Copy this file to .github/workflows/daily-digest.yml in a private repo that has config.yaml at its root.
+# The package version is pinned by the tag in both pip install lines (@v1.0.0); change both to upgrade.
+name: Daily digest
+
+on:
+  schedule:
+    # GitHub's free scheduler can delay or drop runs when it is busy, so check every 30 minutes from 07:10 to
+    # 10:40 UTC. The gate job decides whether to really run: only after 08:00 UK time, and only if today's digest
+    # has not been sent yet, so you get at most one email a day.
+    # The first check after 08:00 UK time is at 08:10 in both summer (BST) and winter (GMT).
+    - cron: "10,40 7-10 * * *"
+  workflow_dispatch:        # adds a "Run workflow" button on the Actions page
+    inputs:
+      portfolio_only:
+        description: "Only build the portfolio section (printed to the run log, no email)"
+        type: boolean
+        default: false
+      list_only:
+        description: "Only list new videos and posts (no Gemini calls, no email)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write           # commit the digest archive and run records back to this repo
+
+concurrency: daily-digest   # never run two digests at once
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - uses: actions/checkout@v7   # the gate looks for today's file in digests/
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"   # manual runs always go ahead
+          else
+            pip install "finfluencer-digest @ git+https://github.com/jackieyangjq/finfluencer-digest@v1.0.0"
+            # Line 1 (run=true or run=false) becomes the job output; line 2, if any, is the reason, shown in the log
+            finfluencer-digest gate --config config.yaml | tee /dev/stderr | head -1 >> "$GITHUB_OUTPUT"
+          fi
+
+  digest:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install "finfluencer-digest[portfolio] @ git+https://github.com/jackieyangjq/finfluencer-digest@v1.0.0"
+      - name: Build and send the digest
+        run: finfluencer-digest --config config.yaml ${{ inputs.portfolio_only && '--portfolio-only' || '' }} ${{ inputs.list_only && '--list' || '' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          WATCHLIST: ${{ secrets.WATCHLIST }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          LONGBRIDGE_APP_KEY: ${{ secrets.LONGBRIDGE_APP_KEY }}
+          LONGBRIDGE_APP_SECRET: ${{ secrets.LONGBRIDGE_APP_SECRET }}
+          LONGBRIDGE_ACCESS_TOKEN: ${{ secrets.LONGBRIDGE_ACCESS_TOKEN }}
+      - name: Save the digest archive and run records
+        if: success() && !inputs.portfolio_only && !inputs.list_only
+        run: |
+          # GitHub's documented identity for commits made by Actions (a public bot account, not a personal address)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Digest $(TZ=Europe/London date +%F)"
+          git push

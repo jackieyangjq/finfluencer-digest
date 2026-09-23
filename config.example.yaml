@@ -1,0 +1,81 @@
+# 复制成 config.yaml 再按需修改。state/、data/、digests/ 会写在 config.yaml 所在的目录。
+
+# 要追踪的博主。新增博主：运行 finfluencer-digest --find-channel @频道名 查到 ID，照格式加一行
+channels:
+  # 原有 4 位：偏看多，关注 AI 与科技成长股
+  - name: 老李玩钱
+    id: UCo2gxyermsLBSCxFHvJs0Zg
+  - name: Money or Life
+    id: UC9cfcOuTT9rYkyUimMjLxuw
+  - name: 阳光财经
+    id: UC2I5em6UyBpQiO-8ZW0nV3w
+  - name: 视野环球财经
+    id: UCFQsi7WaF5X41tcuOryDk8w
+  # 2026-09 新增：宏观数据、风险、技术面和产业视角，用来平衡上面偏看多的观点
+  - name: 投资TALK君          # 宏观数据 + 仓位管理，会明确说何时减仓
+    id: UCRBrH2qS7yKGMNSmjnj8gcw
+  - name: 游庭皓的财经皓角     # 台湾每日早盘：美联储、债券、油价，长期指数投资者
+    id: UC0lbAQVpenvfA2QqzsRtL_g
+  - name: 财经M平方            # 宏观数据研究团队，最少炒作
+    id: UC6LU7FUBvbFCh_cQasrHZ_Q
+  - name: 卡尔先生             # 偏空的风险视角：杠杆、流动性、泡沫信号
+    id: UCyLfdFS2iI54rx4EDVjivsQ
+  - name: 股市咖啡屋           # 技术面、市场广度、期权，会说明自己加减仓
+    id: UCGDMLMZtjCd5P4fhTCetwsw
+  - name: 硅谷101              # 科技产业深度报道，每周一期，不荐股
+    id: UCKV2yWPB3wn0RTZh3cTD8YA
+  # 2026-09 新增英文博主（摘要同样输出简体中文）
+  - name: Aswath Damodaran     # 纽约大学估值学教授，公开估值模型和自己的买卖
+    id: UCLvnJL8htRR1T9cbSccaoVw
+  - name: Patrick Boyle        # 前对冲基金经理、金融学讲师，每周一期，偏怀疑视角，不卖课
+    id: UCASM0cgfkJxQ1ICmRilfHLw
+  - name: Joseph Wang          # 前纽约联储交易员，讲美联储和资金流动性
+    id: UCsJxlgjWIOcuEbOJZ591V3Q
+  - name: Chip Stock Investor  # 芯片和 AI 硬件基本面
+    id: UC3aD-gfmHV_MhMmcwyIu1wA
+  - name: The Plain Bagel      # 特许金融分析师（CFA）讲解，不荐股，更新少
+    id: UCFCEuCsyWP0YkP3CZ3Mr01Q
+  - name: Steve Eisman         # 《大空头》原型人物，看银行、信贷和 AI 融资风险
+    id: UCzQ2FFVe7m8yIgzXMZtlSjg
+
+# X（推特）博主：通过免费的 FxTwitter 公开接口读取（非官方，失效时日报末尾会提示）
+x_accounts:
+  - name: SEPTINVESTING
+    handle: septinvesting66
+    note: 商业推广号：推销收费 AI 交易工具，喊单未经独立核实，命中率会在积累数据后统计
+
+lookback_hours: 36          # 只看最近多少小时内发布的视频（处理过的会自动跳过）
+max_videos_per_channel: 3   # 每位博主每天最多处理几个视频
+skip_shorts: true           # 跳过 Shorts 短视频
+send_when_empty: true       # 没有新视频时也发一封简短邮件，确认系统在正常运行
+max_workers: 3              # 同时看几个视频
+
+# 模型按顺序尝试：前一个繁忙或额度用完，自动换下一个
+video_models:               # 看视频
+  - gemini-3.8-flash        # 目前最好的 Flash 模型
+  - gemini-3.5-flash
+  - gemini-3.5-flash-lite
+synth_models:               # 写“今日共识与分歧”，每天只调用 1 次
+  - gemini-3.8-flash        # 目前全部用免费版可用的模型；开通付费后可在最前面加 gemini-3.1-pro-preview
+  - gemini-3.5-flash
+  - gemini-3.5-flash-lite
+video_fps: 0.2              # 每秒抽几帧画面。财经视频主要靠说话，实测每秒视频约 38 tokens
+max_minutes: 50             # 每个视频最多看前 50 分钟，避免超长直播耗光免费额度（免费版每天约 8 小时视频）
+
+# ---------- 持仓梳理（可选） ----------
+# 打开后日报最前面多一节“我的持仓”：需要安装 [portfolio] 附加依赖，并提供持仓文件（格式见 deploy/README.md）
+portfolio:
+  enabled: false
+  manual_file: holdings_manual.yaml   # 手动维护的持仓表，放在 config.yaml 同一目录
+  single_stock_warn: 0.35             # 单只股票占股票市值超过这个比例就提示
+  theme_warn: 0.5                     # 同一主题的股票合计超过这个比例就提示
+  loss_from_cost_warn: 0.2            # 比成本价跌超这个比例就提示
+  earnings_within_days: 7             # 这么多天内要发财报就提示
+  blogger_days: 7                     # 列出最近几天博主对你持仓的看法
+  news_days: 7                        # 每只持仓看最近几天的新闻
+  news_per_stock: 15                  # 每只持仓最多交给 Gemini 几条新闻
+  market:                             # “盘面”一行看哪些指数（名称: 行情库代码）
+    标普500: SPY                      # 可以再加，如 纳斯达克100: QQQ、恐慌指数VIX: ^VIX
+  holdings_extra:                     # 每只持仓的补充设置（代码用行情库格式）；没写的用默认值
+    # benchmark：拿来对比强弱的板块；theme：投资大类（判断“主题集中”用）；news_queries：Google 新闻搜索词，含中文就搜中文新闻
+    NVDA: {benchmark: SPY, theme: AI 算力, news_queries: ["Nvidia stock", "英伟达"]}
