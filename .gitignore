@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+.env
+demo-output/
+state/
+data/
+digests/
+.superpowers/
