@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCxxxxxxxxxxxxxxxxxxxxxx"/>
+ <id>yt:channel:xxxxxxxxxxxxxxxxxxxxxx</id>
+ <yt:channelId>xxxxxxxxxxxxxxxxxxxxxx</yt:channelId>
+ <title>示例频道</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx"/>
+ <author>
+  <name>示例频道</name>
+  <uri>https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx</uri>
+ </author>
+ <published>2020-01-01T00:00:00+00:00</published>
+ <entry>
+  <id>yt:video:abc123</id>
+  <yt:videoId>abc123</yt:videoId>
+  <yt:channelId>UCxxxxxxxxxxxxxxxxxxxxxx</yt:channelId>
+  <title>财报解读</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=abc123"/>
+  <author>
+   <name>示例频道</name>
+   <uri>https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx</uri>
+  </author>
+  <published>2026-09-23T06:00:00+00:00</published>
+  <updated>2026-09-23T06:05:00+00:00</updated>
+  <media:group>
+   <media:title>财报解读</media:title>
+   <media:content url="https://www.youtube.com/v/abc123?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/abc123/hqdefault.jpg" width="480" height="360"/>
+   <media:description>测试用的示例视频。</media:description>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:short1</id>
+  <yt:videoId>short1</yt:videoId>
+  <yt:channelId>UCxxxxxxxxxxxxxxxxxxxxxx</yt:channelId>
+  <title>一分钟看懂降息</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/short1"/>
+  <author>
+   <name>示例频道</name>
+   <uri>https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx</uri>
+  </author>
+  <published>2026-09-23T07:00:00+00:00</published>
+  <updated>2026-09-23T07:05:00+00:00</updated>
+  <media:group>
+   <media:title>一分钟看懂降息</media:title>
+   <media:content url="https://www.youtube.com/v/short1?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/short1/hqdefault.jpg" width="480" height="360"/>
+   <media:description>测试用的示例短视频。</media:description>
+  </media:group>
+ </entry>
+</feed>
