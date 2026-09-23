@@ -80,7 +80,7 @@ GitHub's free scheduler can start a run late or drop it when it is busy, so one 
 
 ### News bullets must cite a source the program fetched
 
-This applies to the optional portfolio section. Gemini sorts each holding's news from the last 7 days into good-news and bad-news bullets, and the output schema asks for every bullet to end with its date and source, such as (09-22 Reuters). `cited_only` in `portfolio/section.py` keeps a bullet only if that source matches a news item the program actually fetched from Longbridge, Finnhub, Google News or Yahoo Finance. That drops bullets where the model passed off a technical indicator as news or made up a source; if nothing is left, the card lists the fetched headlines instead. Gemini only sees public data here, such as tickers, prices, indicators, analyst targets, news and the bloggers' views,, never your quantities, costs or amounts.
+This applies to the optional portfolio section. Gemini sorts each holding's news from the last 7 days into good-news and bad-news bullets, and the output schema asks for every bullet to end with its date and source, such as (09-22 Reuters). `cited_only` in `portfolio/section.py` keeps a bullet only if that source matches a news item the program actually fetched from Longbridge, Finnhub, Google News or Yahoo Finance. That drops bullets where the model passed off a technical indicator as news or made up a source; if nothing is left, the card lists the fetched headlines instead. Gemini only sees public data here, such as tickers, prices, indicators, analyst targets, news and the bloggers' views, never your quantities, costs or amounts.
 
 ### Every call is logged for scoring later
 
@@ -186,7 +186,7 @@ config.example.yaml     channels, X accounts, models, portfolio settings
 
 ## Roadmap
 
-- **Filings Q&A research agent** (October 2026): answers questions about companies from their SEC filings, with a source for every sentence.
+- **Filings Q&A research agent** (October–November 2026): answers questions about companies from their SEC filings, with a source for every sentence.
 - **finfluencer-scorecard** (November 2026): checks the calls in `data/calls.jsonl` against the price moves that followed, giving each blogger a hit rate.
 
 ## License

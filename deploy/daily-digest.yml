@@ -43,8 +43,13 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"   # manual runs always go ahead
           else
             pip install "finfluencer-digest @ git+https://github.com/jackieyangjq/finfluencer-digest@v1.0.0"
-            # Line 1 (run=true or run=false) becomes the job output; line 2, if any, is the reason, shown in the log
-            finfluencer-digest gate --config config.yaml | tee /dev/stderr | head -1 >> "$GITHUB_OUTPUT"
+            out="$(finfluencer-digest gate --config config.yaml)"
+            echo "$out"   # line 1 is run=true or run=false; line 2, if any, is the reason
+            first="$(printf '%s\n' "$out" | head -1)"
+            case "$first" in
+              run=true|run=false) echo "$first" >> "$GITHUB_OUTPUT" ;;   # becomes the job output
+              *) echo "Unexpected output from finfluencer-digest gate" >&2; exit 1 ;;
+            esac
           fi
 
   digest:
