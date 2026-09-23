@@ -3,27 +3,27 @@
   "results": [
     {
       "id": "1970000000000000003",
-      "url": "https://x.com/sample_trader/status/1970000000000000003",
+      "url": "https://x.com/sample_trader_demo/status/1970000000000000003",
       "text": "演示帖（虚构）：$NVDA 放量站上前高，趋势还在，继续拿着。",
       "created_at": "Wed Sep 23 07:40:00 +0000 2026",
       "created_timestamp": 1790149200,
-      "author": {"screen_name": "sample_trader", "name": "示例交易员"}
+      "author": {"screen_name": "sample_trader_demo", "name": "示例交易员"}
     },
     {
       "id": "1970000000000000002",
-      "url": "https://x.com/sample_trader/status/1970000000000000002",
+      "url": "https://x.com/sample_trader_demo/status/1970000000000000002",
       "text": "演示帖（虚构）：$TSLA 反弹没有量，降价还没停，反弹就减一点。",
       "created_at": "Wed Sep 23 03:10:00 +0000 2026",
       "created_timestamp": 1790133000,
-      "author": {"screen_name": "sample_trader", "name": "示例交易员"}
+      "author": {"screen_name": "sample_trader_demo", "name": "示例交易员"}
     },
     {
       "id": "1970000000000000001",
-      "url": "https://x.com/sample_trader/status/1970000000000000001",
+      "url": "https://x.com/sample_trader_demo/status/1970000000000000001",
       "text": "演示帖（虚构）：今晚美联储官员讲话，科技股波动可能放大，仓位别太满。",
       "created_at": "Tue Sep 22 20:30:00 +0000 2026",
       "created_timestamp": 1790109000,
-      "author": {"screen_name": "sample_trader", "name": "示例交易员"}
+      "author": {"screen_name": "sample_trader_demo", "name": "示例交易员"}
     }
   ]
 }

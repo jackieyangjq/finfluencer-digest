@@ -8,7 +8,7 @@ license = { text = "MIT" }
 dependencies = ["google-genai>=2.25", "pyyaml", "markdown", "python-dotenv", "pydantic>=2"]
 
 [project.optional-dependencies]
-portfolio = ["pandas", "yfinance", "longbridge"]
+portfolio = ["pandas", "yfinance", "longbridge>=5"]
 dev = ["pytest>=8", "ruff>=0.6"]
 
 [project.scripts]

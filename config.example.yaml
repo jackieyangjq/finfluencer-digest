@@ -42,7 +42,7 @@ channels:
 x_accounts:
   - name: SEPTINVESTING
     handle: septinvesting66
-    note: 商业推广号：推销收费 AI 交易工具，喊单未经独立核实，命中率会在积累数据后统计
+    note: 英文交易账号，帖子以个股喊单为主；观点未经独立核实，记录下来供日后统计命中率
 
 lookback_hours: 36          # 只看最近多少小时内发布的视频（处理过的会自动跳过）
 max_videos_per_channel: 3   # 每位博主每天最多处理几个视频

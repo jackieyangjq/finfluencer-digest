@@ -35,7 +35,7 @@ def _content_ctx():
 
 
 def to_longbridge(yahoo: str) -> str | None:
-    """行情库代码转长桥代码：VRT → VRT.US，1211.HK → 1211.HK，^HSI → HSI.HK；其他指数返回 None。"""
+    """行情库代码转长桥代码：NVDA → NVDA.US，0700.HK → 700.HK，^HSI → HSI.HK；其他指数返回 None。"""
     if yahoo == "^HSI":
         return "HSI.HK"
     if yahoo.endswith(".HK"):
@@ -65,5 +65,5 @@ def quotes(yahoo_symbols: list[str]) -> dict[str, dict]:
 
 
 def news(symbol: str) -> list:
-    """长桥资讯；symbol 用长桥格式（VRT.US、1211.HK）。"""
+    """长桥资讯；symbol 用长桥格式（NVDA.US、700.HK）。"""
     return _content_ctx().news(symbol) if available() else []

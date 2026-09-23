@@ -38,6 +38,7 @@ jobs:
           python-version: "3.12"
       - id: check
         run: |
+          set -eo pipefail   # if the gate command crashes, fail this job instead of silently skipping the digest
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"   # manual runs always go ahead
           else

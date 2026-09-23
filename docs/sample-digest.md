@@ -94,7 +94,7 @@
 
 - 如果通胀反弹、降息推迟，科技股估值会承压
 
-### 示例交易员（X）：[最近 3 条帖子](https://x.com/sample_trader)
+### 示例交易员（X）：[最近 3 条帖子](https://x.com/sample_trader_demo)
 
 *演示账号*
 

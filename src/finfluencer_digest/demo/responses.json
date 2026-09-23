@@ -109,7 +109,7 @@
       "如果通胀反弹、降息推迟，科技股估值会承压"
     ]
   },
-  "x:sample_trader": {
+  "x:sample_trader_demo": {
     "is_market_related": true,
     "one_line": "演示：交易员看多英伟达的突破，看空特斯拉的反弹。",
     "main_points": [

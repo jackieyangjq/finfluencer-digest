@@ -39,7 +39,7 @@ def _as_date(value) -> dt.date:
 
 
 def from_longbridge(symbol: str, since: dt.date) -> list[dict]:
-    """长桥资讯（中文）。symbol 用长桥格式，如 VRT.US、1211.HK。"""
+    """长桥资讯（中文）。symbol 用长桥格式，如 NVDA.US、700.HK。"""
     out = [_item(_as_date(n.published_at), "长桥", n.title, n.description, n.url) for n in longbridge_api.news(symbol)]
     return [x for x in out if x["date"] >= since.isoformat()][:PER_SOURCE]
 

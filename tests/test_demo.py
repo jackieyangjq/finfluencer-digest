@@ -1,7 +1,10 @@
 import os
 import socket
+from pathlib import Path
 
 from finfluencer_digest.cli import main
+
+SAMPLE = Path(__file__).resolve().parents[1] / "docs" / "sample-digest.md"
 
 
 def test_demo_runs_end_to_end_without_network(tmp_path, capsys):
@@ -33,3 +36,11 @@ def test_demo_needs_no_keys_network_or_local_files(tmp_path, monkeypatch):
     watch_section = md.split("## 你关注的股票\n", 1)[1].split("\n## ", 1)[0]
     assert "**NVDA**" in watch_section and "**TSLA**" not in watch_section
     assert "GEMINI_API_KEY" not in os.environ
+
+
+def test_sample_digest_matches_demo_output(tmp_path):
+    """docs/sample-digest.md 必须是演示模式的原样输出：演示素材或排版改了而样例没跟着更新，这里就会失败。"""
+    assert main(["--demo", "--out", str(tmp_path)]) == 0
+    assert (tmp_path / "2026-09-23.md").read_text(encoding="utf-8") == SAMPLE.read_text(encoding="utf-8"), (
+        "样例日报过期了：在一个空目录运行 finfluencer-digest --demo --out <目录>，"
+        "把其中的 2026-09-23.md 复制到 docs/sample-digest.md")

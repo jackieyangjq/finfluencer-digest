@@ -33,7 +33,7 @@ logging.getLogger("yfinance").setLevel(logging.CRITICAL)  # ETF 没有财报日�
 # ---------- 读持仓 ----------
 
 def yahoo_symbol(symbol: str) -> str:
-    """长桥格式转成行情库格式：VRT.US → VRT，1211.HK → 1211.HK，700.HK → 0700.HK。"""
+    """长桥格式转成行情库格式：NVDA.US → NVDA，700.HK → 0700.HK，00700.HK → 0700.HK。"""
     code, _, market = symbol.upper().partition(".")
     if market == "HK":
         return code.lstrip("0").zfill(4) + ".HK"
@@ -41,7 +41,7 @@ def yahoo_symbol(symbol: str) -> str:
 
 
 def base_symbol(symbol: str) -> str:
-    """用来和博主提到的代码对上：VRT.US → VRT，01211.HK → 1211。"""
+    """用来和博主提到的代码对上：NVDA.US → NVDA，00700.HK → 700。"""
     return symbol.upper().split(".")[0].lstrip("$").lstrip("0") or "0"
 
 

@@ -8,7 +8,7 @@ channels:
     id: UCdemo00000000000000003
 x_accounts:
   - name: 示例交易员
-    handle: sample_trader
+    handle: sample_trader_demo
     note: 演示账号
 lookback_hours: 36
 max_videos_per_channel: 3
