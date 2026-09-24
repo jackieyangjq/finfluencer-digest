@@ -189,7 +189,7 @@ config.example.yaml     频道、X 账号、模型、持仓设置
 ## 后续计划
 
 - **财报问答研究助手**（2026 年 10 月至 11 月）：根据公司向美国证监会（SEC）提交的文件（年报、季报等）回答关于公司的问题，每句话都注明出处。
-- **finfluencer-scorecard**（博主记分牌，2026 年 11 月）：把 `data/calls.jsonl` 里的观点和之后的实际涨跌对照，算出每位博主的命中率。
+- **观点记分牌**（2026-09-24 已在 [catfolio fork](https://github.com/jackieyangjq/catfolio) 里上线，上游 [PR #7](https://github.com/irrwood/catfolio/pull/7)）：导入 `data/calls.jsonl`，把每条观点和之后的实际涨跌对照，给每位博主算出命中率和“每次都跟”的净值曲线。
 
 ## 许可证
 

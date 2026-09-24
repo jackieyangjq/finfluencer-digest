@@ -189,7 +189,7 @@ config.example.yaml     channels, X accounts, models, portfolio settings
 ## Roadmap
 
 - **Filings Q&A research agent** (October–November 2026): answers questions about companies from their SEC filings, with a source for every sentence.
-- **finfluencer-scorecard** (November 2026): checks the calls in `data/calls.jsonl` against the price moves that followed, giving each blogger a hit rate.
+- **Call tracker** (shipped 2026-09-24 in the [catfolio fork](https://github.com/jackieyangjq/catfolio); upstream [PR #7](https://github.com/irrwood/catfolio/pull/7)): imports `data/calls.jsonl` and scores every call against the price moves that followed, with a hit rate and a follow-every-call curve per blogger.
 
 ## License
 
