@@ -1,5 +1,7 @@
 # finfluencer-digest
 
+**English** | [简体中文](README.zh-CN.md)
+
 [![CI](https://github.com/jackieyangjq/finfluencer-digest/actions/workflows/ci.yml/badge.svg)](https://github.com/jackieyangjq/finfluencer-digest/actions/workflows/ci.yml)
 
 Daily digest of finance YouTubers and X accounts: Gemini watches the videos, extracts structured stock calls, aggregates consensus, and emails you.
@@ -192,16 +194,3 @@ config.example.yaml     channels, X accounts, models, portfolio settings
 ## License
 
 MIT © 2026 Jiaqi Yang. See [LICENSE](LICENSE).
-
-## 中文说明
-
-财经博主日报：每天找出你关注的财经 YouTube 频道和 X 账号的新内容，让 Gemini 直接看视频（不下载、不转文字），按固定格式提炼每位博主的观点和对个股的看多、看空态度，统计共识与分歧后发到你的邮箱。日报正文和提示词都是简体中文，频道可以是任何语言。可选的“我的持仓”部分会给每只持仓加上价格、技术指标、新闻和博主观点。程序只整理信息，不给买卖建议。
-
-不需要密钥、不联网的演示（还没发布到 PyPI，也就是 Python 的官方软件包仓库，所以从 GitHub 安装）：
-
-```bash
-pip install "finfluencer-digest @ git+https://github.com/jackieyangjq/finfluencer-digest"
-finfluencer-digest --demo
-```
-
-正式使用分三步：填好配置和密钥、运行 `--check` 检查、用 `--limit 1 --dry-run` 试跑一个视频，命令见上文 [Run it](#run-it)。每天自动运行的部署方法见 [deploy/README.md](deploy/README.md)。
